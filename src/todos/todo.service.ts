@@ -1,46 +1,54 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Todo } from './todo.entity';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { CreateTodoDto } from './dtos/craete-todo.dto';
 import { UpdateTodoDto } from './dtos/update-todo.dto';
+import { InjectModel } from '@nestjs/sequelize';
 
 @Injectable()
 export class TodoService {
   constructor(
-    @InjectRepository(Todo) private readonly todoRepository: Repository<Todo>,
+    @InjectModel(Todo)
+    private readonly todoRepository: typeof Todo,
   ) {}
 
   async findAll() {
-    return await this.todoRepository.find();
+    return await this.todoRepository.findAll();
   }
 
   async findOne(id: number) {
-    return await this.todoRepository.query(
-      `SELECT * FROM Todo WHERE id = ${id};`,
-    );
+    return await this.todoRepository.findOne({
+      where: {
+        id,
+      },
+    });
   }
 
   async createTodo(createTodoDto: CreateTodoDto) {
-    const creatTodo = this.todoRepository.create(createTodoDto);
-    return await this.todoRepository.save(creatTodo);
+    return await this.todoRepository.create({
+      title: createTodoDto.title,
+      description: createTodoDto.description,
+      isCompleted: createTodoDto.isCompleted,
+    });
   }
 
   async updateTodo(id: number, updateTodoDto: UpdateTodoDto) {
     const todoUpdate = await this.findOne(id);
 
-    if (todoUpdate.length === 0) {
+    if (todoUpdate === null) {
       throw new NotFoundException(`Todo with ID ${id} not found`);
     }
-    return await this.todoRepository.update(id, updateTodoDto);
+    return await this.todoRepository.update(updateTodoDto, {
+      where: { id },
+      returning: true,
+    });
   }
 
   async deleteTodo(id: number) {
     const todoDelete = await this.findOne(id);
 
-    if (todoDelete.length === 0) {
+    if (todoDelete === null) {
       throw new NotFoundException(`Todo with ID ${id} not found`);
     }
-    return await this.todoRepository.remove(todoDelete);
+    return await this.todoRepository.destroy({ where: { id } });
   }
 }

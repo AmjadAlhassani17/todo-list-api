@@ -1,28 +1,33 @@
 import {
-  Entity,
-  PrimaryGeneratedColumn,
+  Table,
+  Model,
+  PrimaryKey,
   Column,
-  CreateDateColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+  CreatedAt,
+  UpdatedAt,
+  DataType,
+} from 'sequelize-typescript';
 
-@Entity({ name: 'Todo' })
-export class Todo {
-  @PrimaryGeneratedColumn()
+@Table
+export class Todo extends Model {
+  @PrimaryKey
+  @Column({ type: DataType.NUMBER, autoIncrement: true })
   id: number;
 
-  @Column({ length: 100 })
+  @Column({ type: DataType.STRING, allowNull: false })
   title: string;
 
-  @Column('text')
+  @Column({ type: DataType.TEXT, allowNull: false })
   description: string;
 
-  @Column({ default: false })
+  @Column({ type: DataType.BOOLEAN, allowNull: false, defaultValue: true })
   isCompleted: boolean;
 
-  @CreateDateColumn()
+  @CreatedAt
+  @Column
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdatedAt
+  @Column
   updatedAt: Date;
 }

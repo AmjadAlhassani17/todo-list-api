@@ -45,7 +45,7 @@ export class TodoController {
   @Get(':id')
   async findOne(@Res() res: Response, @Param('id', ParseIntPipe) id: number) {
     const todoList = await this.todoService.findOne(id);
-    if (todoList.length !== 0) {
+    if (todoList !== null) {
       return res.status(200).json({
         status: {
           success: true,
@@ -61,7 +61,7 @@ export class TodoController {
           code: 404,
           message: 'Todo not found!',
         },
-        data: todoList,
+        data: [],
       });
     }
   }
