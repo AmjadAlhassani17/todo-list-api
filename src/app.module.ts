@@ -1,17 +1,21 @@
 import { Module } from '@nestjs/common';
 import { TodoModule } from './todos/todo.module';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { SequelizeModule } from '@nestjs/sequelize';
 import sequelizeConfig from './database/database.config';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: '.development.env',
+      envFilePath: '.env',
       ignoreEnvFile: true,
       isGlobal: true,
     }),
-    SequelizeModule.forRoot(sequelizeConfig),
+    SequelizeModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: sequelizeConfig,
+      inject: [ConfigService],
+    }),
     TodoModule,
   ],
 })

@@ -6,28 +6,28 @@ import {
   CreatedAt,
   UpdatedAt,
   DataType,
+  AutoIncrement,
 } from 'sequelize-typescript';
 
-@Table
-export class Todo extends Model {
+@Table({ tableName: 'Todos' })
+export class Todo extends Model<Todo> {
   @PrimaryKey
-  @Column({ type: DataType.NUMBER, autoIncrement: true })
+  @AutoIncrement
+  @Column(DataType.INTEGER)
   id: number;
 
-  @Column({ type: DataType.STRING, allowNull: false })
+  @Column(DataType.STRING(255))
   title: string;
 
-  @Column({ type: DataType.TEXT, allowNull: false })
+  @Column(DataType.TEXT)
   description: string;
 
-  @Column({ type: DataType.BOOLEAN, allowNull: false, defaultValue: true })
+  @Column(DataType.BOOLEAN)
   isCompleted: boolean;
 
   @CreatedAt
-  @Column
   createdAt: Date;
 
   @UpdatedAt
-  @Column
   updatedAt: Date;
 }
