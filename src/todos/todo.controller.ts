@@ -8,6 +8,8 @@ import {
   Put,
   Delete,
   ParseIntPipe,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { TodoService } from './todo.service';
 import { Response } from 'express';
@@ -31,14 +33,10 @@ export class TodoController {
         data: todoList,
       });
     } catch (error) {
-      return res.status(500).json({
-        status: {
-          success: false,
-          code: 500,
-          message: 'Internal Server Error',
-        },
-        error: error.message,
-      });
+      throw new HttpException(
+        'something want wrong!',
+        HttpStatus.SERVICE_UNAVAILABLE,
+      );
     }
   }
 
@@ -55,14 +53,7 @@ export class TodoController {
         data: todoList,
       });
     } else {
-      return res.status(404).json({
-        status: {
-          success: false,
-          code: 404,
-          message: 'Todo not found!',
-        },
-        data: [],
-      });
+      throw new HttpException('Todo not found!', HttpStatus.NOT_FOUND);
     }
   }
 
@@ -97,14 +88,7 @@ export class TodoController {
         data: todoUpdate,
       });
     } catch (error) {
-      return res.status(404).json({
-        status: {
-          success: false,
-          code: 404,
-          message: 'Data not found!',
-        },
-        data: error.message,
-      });
+      throw new HttpException('data not found!', HttpStatus.NOT_FOUND);
     }
   }
 
@@ -124,14 +108,7 @@ export class TodoController {
         data: 'Delete Data Successfuly',
       });
     } catch (error) {
-      return res.status(404).json({
-        status: {
-          success: false,
-          code: 404,
-          message: 'Data not found!',
-        },
-        data: error.message,
-      });
+      throw new HttpException('Todo not found!', HttpStatus.NOT_FOUND);
     }
   }
 }

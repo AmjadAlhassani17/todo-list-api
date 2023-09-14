@@ -4,6 +4,7 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { ValidationPipe } from '@nestjs/common';
 import * as dotenv from 'dotenv';
 import { LoggingInterceptor } from './Interceptors/logging.interceptor';
+import { AllExceptionFilter } from './exceptions/all-exceptions.filter';
 
 async function bootstrap() {
   dotenv.config();
@@ -12,6 +13,7 @@ async function bootstrap() {
     new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }),
   );
   app.useGlobalInterceptors(new LoggingInterceptor());
+  app.useGlobalFilters(new AllExceptionFilter());
   await app.listen(3000);
 }
 bootstrap();

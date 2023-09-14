@@ -24,11 +24,7 @@ export class TodoService {
   }
 
   async createTodo(createTodoDto: CreateTodoDto) {
-    return await this.todoRepository.create({
-      title: createTodoDto.title,
-      description: createTodoDto.description,
-      isCompleted: createTodoDto.isCompleted,
-    });
+    return await this.todoRepository.create(createTodoDto);
   }
 
   async updateTodo(id: number, updateTodoDto: UpdateTodoDto) {
