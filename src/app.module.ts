@@ -3,6 +3,7 @@ import { TodoModule } from './todos/todo.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { SequelizeModule } from '@nestjs/sequelize';
 import sequelizeConfig from './database/database.config';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import sequelizeConfig from './database/database.config';
       inject: [ConfigService],
     }),
     TodoModule,
+    AuthModule,
   ],
 })
 export class AppModule {}
