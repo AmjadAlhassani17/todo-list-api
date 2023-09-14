@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { AuthEntity } from './auth.entity';
@@ -7,6 +7,8 @@ import { PassportModule } from '@nestjs/passport';
 import { RolesGuard } from 'src/guards/roles.guard';
 import { JwtStrategy } from 'src/guards/jwt-strategy.guard';
 import { SequelizeModule } from '@nestjs/sequelize';
+import { TokenVerificationMiddleware } from 'src/middlewares/token-verification.middleware';
+import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
 
 @Module({
   imports: [
@@ -20,8 +22,13 @@ import { SequelizeModule } from '@nestjs/sequelize';
       defaultStrategy: 'jwt',
     }),
   ],
-  providers: [AuthService, RolesGuard, JwtStrategy],
+  providers: [AuthService, RolesGuard, JwtStrategy, JwtAuthGuard],
   controllers: [AuthController],
   exports: [AuthService],
 })
-export class AuthModule {}
+export class AuthModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(TokenVerificationMiddleware).forRoutes('auth/vi/updateUser');
+    consumer.apply(TokenVerificationMiddleware).forRoutes('auth/vi/deleteUser');
+  }
+}
