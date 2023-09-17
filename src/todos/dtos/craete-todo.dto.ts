@@ -12,4 +12,6 @@ export class CreateTodoDto {
   @IsNotEmpty()
   @IsBoolean()
   isCompleted: boolean;
+
+  createdBy: number;
 }

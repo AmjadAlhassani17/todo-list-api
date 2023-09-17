@@ -1,6 +1,5 @@
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus, Inject } from '@nestjs/common';
 import { AuthEntity } from './auth.entity';
-import { InjectModel } from '@nestjs/sequelize';
 import { RegisterUserDto } from './dots/register-user.dto';
 import * as bcrypt from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
@@ -10,7 +9,7 @@ import { UpdateUserDto } from './dots/update-user.dto';
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectModel(AuthEntity)
+    @Inject('AUTH_REPOSITORY')
     private readonly authRepository: typeof AuthEntity,
     private jwtService: JwtService,
   ) {}
@@ -37,7 +36,7 @@ export class AuthService {
     if (checkEmail !== null) {
       throw new HttpException(
         `User with email ${registerUserDto.email} is found!`,
-        HttpStatus.NOT_FOUND,
+        HttpStatus.FOUND,
       );
     }
 
@@ -64,7 +63,16 @@ export class AuthService {
       algorithm: 'HS512',
     });
 
-    return { ...createUserDto['dataValues'], token };
+    const userData = { ...createUserDto['dataValues'], token };
+
+    return {
+      status: {
+        success: true,
+        code: 201,
+        message: 'User Register Successfuly',
+      },
+      data: userData,
+    };
   }
 
   async loginUser(loginUserDto: LoginUserDto) {
@@ -101,7 +109,16 @@ export class AuthService {
       algorithm: 'HS512',
     });
 
-    return { ...user, jwtToken };
+    const userData = { ...user, jwtToken };
+
+    return {
+      status: {
+        success: true,
+        code: 200,
+        message: 'User Login Successfuly',
+      },
+      data: userData,
+    };
   }
 
   async verifyToken(token: string) {
@@ -123,10 +140,19 @@ export class AuthService {
       );
     }
 
-    return await this.authRepository.update(updateUserDto, {
+    await this.authRepository.update(updateUserDto, {
       where: { id: userId },
       returning: true,
     });
+
+    return {
+      status: {
+        success: true,
+        code: 200,
+        message: 'Update User Successfuly',
+      },
+      data: await this.findOneById(userId),
+    };
   }
 
   async deleteUser(userId: number) {
@@ -139,6 +165,14 @@ export class AuthService {
       );
     }
 
-    return await this.authRepository.destroy({ where: { id: userId } });
+    await this.authRepository.destroy({ where: { id: userId } });
+
+    return {
+      status: {
+        success: true,
+        code: 200,
+        message: 'User deleted Successfuly',
+      },
+    };
   }
 }

@@ -1,50 +1,107 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { HttpException, Injectable, HttpStatus, Inject } from '@nestjs/common';
 import { Todo } from './todo.entity';
 import { CreateTodoDto } from './dtos/craete-todo.dto';
 import { UpdateTodoDto } from './dtos/update-todo.dto';
-import { InjectModel } from '@nestjs/sequelize';
 
 @Injectable()
 export class TodoService {
   constructor(
-    @InjectModel(Todo)
+    @Inject('TODOS_REPOSITORY')
     private readonly todoRepository: typeof Todo,
   ) {}
 
   async findAll() {
-    return await this.todoRepository.findAll();
+    try {
+      const todoList = await this.todoRepository.findAll();
+      return {
+        status: {
+          success: true,
+          code: 200,
+          message: 'Get All Data Successfuly',
+        },
+        data: todoList,
+      };
+    } catch (error) {
+      throw new HttpException(
+        'something want wrong!',
+        HttpStatus.SERVICE_UNAVAILABLE,
+      );
+    }
   }
 
   async findOne(id: number) {
-    return await this.todoRepository.findOne({
+    const todo = await this.todoRepository.findOne({
       where: {
         id,
       },
     });
+    if (todo !== null) {
+      return {
+        status: {
+          success: true,
+          code: 200,
+          message: 'Get Data Successfuly',
+        },
+        data: todo,
+      };
+    } else {
+      throw new HttpException('Todo not found!', HttpStatus.NOT_FOUND);
+    }
   }
 
-  async createTodo(createTodoDto: CreateTodoDto) {
-    return await this.todoRepository.create(createTodoDto);
+  async createTodo(createTodoDto: CreateTodoDto, createdBy: number) {
+    createTodoDto.createdBy = createdBy;
+    const todoList = await this.todoRepository.create(createTodoDto);
+    return {
+      status: {
+        success: true,
+        code: 201,
+        message: 'Create Data Successfuly',
+      },
+      data: todoList,
+    };
   }
 
-  async updateTodo(id: number, updateTodoDto: UpdateTodoDto) {
+  async updateTodo(
+    id: number,
+    updateTodoDto: UpdateTodoDto,
+    updatedBy: number,
+  ) {
     const todoUpdate = await this.findOne(id);
 
     if (todoUpdate === null) {
-      throw new NotFoundException(`Todo with ID ${id} not found`);
+      throw new HttpException(
+        `Todo with ID ${id} not found`,
+        HttpStatus.NOT_FOUND,
+      );
     }
-    return await this.todoRepository.update(updateTodoDto, {
+    updateTodoDto.updatedBy = updatedBy;
+    await this.todoRepository.update(updateTodoDto, {
       where: { id },
       returning: true,
     });
+
+    return await this.findOne(id);
   }
 
   async deleteTodo(id: number) {
     const todoDelete = await this.findOne(id);
 
     if (todoDelete === null) {
-      throw new NotFoundException(`Todo with ID ${id} not found`);
+      throw new HttpException(
+        `Todo with ID ${id} not found`,
+        HttpStatus.NOT_FOUND,
+      );
     }
-    return await this.todoRepository.destroy({ where: { id } });
+    await this.todoRepository.destroy({ where: { id } });
+
+    return {
+      status: {
+        success: true,
+        code: 200,
+        message: 'Delete Data Successfuly',
+      },
+      data: 'Delete Data Successfuly',
+    };
   }
 }

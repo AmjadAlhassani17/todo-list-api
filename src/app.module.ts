@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TodoModule } from './todos/todo.module';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { SequelizeModule } from '@nestjs/sequelize';
-import sequelizeConfig from './database/database.config';
+import { ConfigModule } from '@nestjs/config';
+import { DatabaseModule } from './database/database.module';
+import { Sequelize } from 'sequelize-typescript';
 import { AuthModule } from './auth/auth.module';
 
 @Module({
@@ -12,13 +12,16 @@ import { AuthModule } from './auth/auth.module';
       ignoreEnvFile: true,
       isGlobal: true,
     }),
-    SequelizeModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: sequelizeConfig,
-      inject: [ConfigService],
-    }),
+    DatabaseModule,
     TodoModule,
     AuthModule,
+  ],
+  providers: [
+    {
+      provide: 'SequelizeInstance',
+      useFactory: (sequelize: Sequelize) => sequelize,
+      inject: ['SEQUELIZE'],
+    },
   ],
 })
 export class AppModule {}

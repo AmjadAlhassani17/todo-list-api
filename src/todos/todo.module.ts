@@ -1,12 +1,13 @@
 import { Module } from '@nestjs/common';
 import { TodoController } from './todo.controller';
 import { TodoService } from './todo.service';
-import { Todo } from './todo.entity';
-import { SequelizeModule } from '@nestjs/sequelize';
+import { DatabaseModule } from 'src/database/database.module';
+import { todosProviders } from './todo.provider';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
-  imports: [SequelizeModule.forFeature([Todo])],
+  imports: [DatabaseModule, AuthModule],
   controllers: [TodoController],
-  providers: [TodoService],
+  providers: [TodoService, ...todosProviders],
 })
 export class TodoModule {}

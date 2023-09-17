@@ -14,6 +14,7 @@ async function bootstrap() {
   );
   app.useGlobalInterceptors(new LoggingInterceptor());
   app.useGlobalFilters(new AllExceptionFilter());
+  app.setGlobalPrefix('api/v1');
   await app.listen(3000);
 }
 bootstrap();
