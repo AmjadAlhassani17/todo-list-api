@@ -6,7 +6,6 @@ import {
   Body,
   Put,
   Delete,
-  Req,
   ParseIntPipe,
   UseGuards,
 } from '@nestjs/common';
@@ -16,7 +15,8 @@ import { UpdateTodoDto } from './dtos/update-todo.dto';
 import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/guards/roles.guard';
 import { Roles } from 'src/guards/roles.decorator';
-import { CustomRequest } from 'src/auth/interface/custom-request.interface';
+import { AuthEntity } from 'src/auth/entity/auth.entity';
+import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 
 @Controller('/todo')
 export class TodoController {
@@ -39,10 +39,9 @@ export class TodoController {
   @Roles('user')
   async createTodo(
     @Body() createTodoDto: CreateTodoDto,
-    @Req() req: CustomRequest,
+    @CurrentUser() user: AuthEntity,
   ) {
-    const createdBy = req.user.id;
-    return await this.todoService.createTodo(createTodoDto, createdBy);
+    return await this.todoService.createTodo(createTodoDto, user.id);
   }
 
   @Put(':id')
@@ -50,11 +49,10 @@ export class TodoController {
   @Roles('user')
   async updateTodo(
     @Body() updateTodoDto: UpdateTodoDto,
-    @Req() req: CustomRequest,
+    @CurrentUser() user: AuthEntity,
     @Param('id', ParseIntPipe) id: number,
   ) {
-    const updatedBy = req.user.id;
-    return await this.todoService.updateTodo(id, updateTodoDto, updatedBy);
+    return await this.todoService.updateTodo(id, updateTodoDto, user.id);
   }
 
   @Delete(':id')

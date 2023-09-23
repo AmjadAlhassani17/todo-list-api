@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, ExtractJwt } from 'passport-jwt';
-import { CustomRequest } from 'src/auth/interface/custom-request.interface';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -13,7 +12,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(request: CustomRequest, payload: any) {
+  async validate(request: any, payload: any) {
     request.user = payload;
     return payload;
   }

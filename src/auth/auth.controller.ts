@@ -2,9 +2,6 @@ import {
   Controller,
   Post,
   Body,
-  Req,
-  HttpException,
-  HttpStatus,
   Param,
   ParseIntPipe,
   UseGuards,
@@ -16,7 +13,11 @@ import { RegisterUserDto } from './dots/register-user.dto';
 import { LoginUserDto } from './dots/login-user.dto';
 import { UpdateUserDto } from './dots/update-user.dto';
 import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
-import { CustomRequest } from './interface/custom-request.interface';
+import { CurrentUser } from './decorators/current-user.decorator';
+import { AuthEntity } from './entity/auth.entity';
+import { RolesGuard } from 'src/guards/roles.guard';
+import { Roles } from 'src/guards/roles.decorator';
+import { TokenVerificationMiddleware } from 'src/middlewares/token-verification.middleware';
 
 @Controller('/auth')
 export class AuthController {
@@ -33,39 +34,23 @@ export class AuthController {
   }
 
   @Put('updateUser/:id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(TokenVerificationMiddleware, JwtAuthGuard, RolesGuard)
+  @Roles('user', 'admin')
   async updateUser(
-    @Req() req: CustomRequest,
+    @CurrentUser() user: AuthEntity,
     @Param('id', ParseIntPipe) id: number,
     @Body() updateUserDto: UpdateUserDto,
   ) {
-    const userId = req.user.id;
-
-    if (userId !== id) {
-      throw new HttpException(
-        'You are not authorized to update this account.',
-        HttpStatus.UNAUTHORIZED,
-      );
-    }
-
-    return await this.authService.updateUser(id, updateUserDto);
+    return await this.authService.updateUser(user, id, updateUserDto);
   }
 
   @Delete('deleteUser/:id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(TokenVerificationMiddleware, JwtAuthGuard, RolesGuard)
+  @Roles('user', 'admin')
   async deleteUser(
-    @Req() req: CustomRequest,
+    @CurrentUser() user: AuthEntity,
     @Param('id', ParseIntPipe) id: number,
   ) {
-    const userId = req.user.id;
-
-    if (userId !== id) {
-      throw new HttpException(
-        'You are not authorized to delete this account.',
-        HttpStatus.UNAUTHORIZED,
-      );
-    }
-
-    return await this.authService.deleteUser(id);
+    return await this.authService.deleteUser(user, id);
   }
 }

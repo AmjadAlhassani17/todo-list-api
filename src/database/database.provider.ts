@@ -1,6 +1,6 @@
 import { Sequelize } from 'sequelize-typescript';
-import { AuthEntity } from 'src/auth/auth.entity';
-import { Todo } from 'src/todos/todo.entity';
+import { AuthEntity } from 'src/auth/entity/auth.entity';
+import { Todo } from 'src/todos/entity/todo.entity';
 
 export const databaseProviders = [
   {
@@ -8,11 +8,11 @@ export const databaseProviders = [
     useFactory: async () => {
       const sequelize = new Sequelize({
         dialect: 'mysql',
-        host: 'localhost',
-        port: 3306,
-        username: 'root',
-        password: 'AS123123',
-        database: 'todolist',
+        host: process.env.DB_HOST,
+        port: +process.env.DB_PORT,
+        username: process.env.DB_USERNAME,
+        password: process.env.DB_PASSWORD,
+        database: process.env.DB_DATABASE_NAME,
       });
       sequelize.addModels([Todo, AuthEntity]);
       await sequelize.sync();

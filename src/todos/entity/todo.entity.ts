@@ -7,10 +7,7 @@ import {
   UpdatedAt,
   DataType,
   AutoIncrement,
-  ForeignKey,
-  DeletedAt,
 } from 'sequelize-typescript';
-import { AuthEntity } from 'src/auth/auth.entity';
 
 @Table({ tableName: 'Todos', underscored: true })
 export class Todo extends Model<Todo> {
@@ -34,18 +31,9 @@ export class Todo extends Model<Todo> {
   @UpdatedAt
   updatedAt: Date;
 
-  @DeletedAt
-  deletedAt: Date;
-
-  @ForeignKey(() => AuthEntity)
   @Column({ type: DataType.INTEGER })
   createdBy: number;
 
-  @ForeignKey(() => AuthEntity)
   @Column({ type: DataType.INTEGER })
   updatedBy: number;
-
-  @ForeignKey(() => AuthEntity)
-  @Column({ type: DataType.INTEGER })
-  deletedBy: number;
 }

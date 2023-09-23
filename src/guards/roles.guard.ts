@@ -32,6 +32,10 @@ export class RolesGuard implements CanActivate {
       return false;
     }
 
+    if (decodedToken.role === 'admin') {
+      return true;
+    }
+
     return requiredRoles.includes(decodedToken.role);
   }
 }

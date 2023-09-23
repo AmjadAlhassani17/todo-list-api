@@ -1,4 +1,4 @@
-import { AuthEntity } from './auth.entity';
+import { AuthEntity } from './entity/auth.entity';
 
 export const authProviders = [
   {

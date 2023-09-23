@@ -1,4 +1,4 @@
-import { Todo } from './todo.entity';
+import { Todo } from './entity/todo.entity';
 
 export const todosProviders = [
   {

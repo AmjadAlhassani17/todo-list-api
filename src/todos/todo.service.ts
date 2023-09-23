@@ -1,5 +1,5 @@
 import { HttpException, Injectable, HttpStatus, Inject } from '@nestjs/common';
-import { Todo } from './todo.entity';
+import { Todo } from './entity/todo.entity';
 import { CreateTodoDto } from './dtos/craete-todo.dto';
 import { UpdateTodoDto } from './dtos/update-todo.dto';
 

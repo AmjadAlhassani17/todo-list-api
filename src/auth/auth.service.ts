@@ -1,5 +1,5 @@
 import { Injectable, HttpException, HttpStatus, Inject } from '@nestjs/common';
-import { AuthEntity } from './auth.entity';
+import { AuthEntity } from './entity/auth.entity';
 import { RegisterUserDto } from './dots/register-user.dto';
 import * as bcrypt from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
@@ -48,7 +48,6 @@ export class AuthService {
 
     const createUserDto = this.authRepository.build({
       ...registerUserDto,
-      role: 'user',
     });
 
     await createUserDto.save();
@@ -56,7 +55,7 @@ export class AuthService {
     const jwtPayload = {
       id: createUserDto.id,
       email: registerUserDto.email,
-      role: 'user',
+      role: registerUserDto.role,
     };
     const token = await this.jwtService.signAsync(jwtPayload, {
       expiresIn: '1d',
@@ -130,13 +129,24 @@ export class AuthService {
     }
   }
 
-  async updateUser(userId: number, updateUserDto: UpdateUserDto) {
+  async updateUser(
+    currentUser: AuthEntity,
+    userId: number,
+    updateUserDto: UpdateUserDto,
+  ) {
     const user = await this.authRepository.findOne({ where: { id: userId } });
 
     if (user === null) {
       throw new HttpException(
         `User with email ${updateUserDto.email} is not found!`,
         HttpStatus.NOT_FOUND,
+      );
+    }
+
+    if (currentUser.role !== 'admin' && currentUser.id !== userId) {
+      throw new HttpException(
+        'You are not authorized to update this account.',
+        HttpStatus.UNAUTHORIZED,
       );
     }
 
@@ -155,13 +165,20 @@ export class AuthService {
     };
   }
 
-  async deleteUser(userId: number) {
+  async deleteUser(currentUser: AuthEntity, userId: number) {
     const user = await this.authRepository.findOne({ where: { id: userId } });
 
     if (user === null) {
       throw new HttpException(
         `User with id ${userId} is not found!`,
         HttpStatus.NOT_FOUND,
+      );
+    }
+
+    if (currentUser.role !== 'admin' && currentUser.id !== userId) {
+      throw new HttpException(
+        'You are not authorized to delete this account.',
+        HttpStatus.UNAUTHORIZED,
       );
     }
 

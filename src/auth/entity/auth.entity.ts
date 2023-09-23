@@ -9,7 +9,7 @@ import {
   AutoIncrement,
 } from 'sequelize-typescript';
 
-@Table({ tableName: 'users' })
+@Table({ tableName: 'users', underscored: true })
 export class AuthEntity extends Model<AuthEntity> {
   @PrimaryKey
   @AutoIncrement
@@ -17,7 +17,10 @@ export class AuthEntity extends Model<AuthEntity> {
   id: number;
 
   @Column(DataType.STRING)
-  username: string;
+  first_name: string;
+
+  @Column(DataType.STRING)
+  last_name: string;
 
   @Column({ type: DataType.STRING, unique: true })
   email: string;
@@ -29,8 +32,8 @@ export class AuthEntity extends Model<AuthEntity> {
   role: string;
 
   @CreatedAt
-  createdAt: Date;
+  created_at: Date;
 
   @UpdatedAt
-  updatedAt: Date;
+  updated_at: Date;
 }

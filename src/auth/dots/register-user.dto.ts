@@ -10,7 +10,11 @@ import {
 export class RegisterUserDto {
   @IsString()
   @IsNotEmpty()
-  username: string;
+  first_name: string;
+
+  @IsString()
+  @IsNotEmpty()
+  last_name: string;
 
   @IsEmail()
   @IsNotEmpty()
@@ -25,4 +29,14 @@ export class RegisterUserDto {
       'Password is too weak, choose a stronger password between 6 and 12 characters',
   })
   password: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @Matches(
+    `^${Object.values(['admin', 'user'])
+      .filter((v) => typeof v !== 'number')
+      .join('|')}$`,
+    'i',
+  )
+  role: string;
 }
