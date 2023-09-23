@@ -2,12 +2,15 @@ import { HttpException, Injectable, HttpStatus, Inject } from '@nestjs/common';
 import { Todo } from './entity/todo.entity';
 import { CreateTodoDto } from './dtos/craete-todo.dto';
 import { UpdateTodoDto } from './dtos/update-todo.dto';
+import { Tag } from './entity/tag.model';
 
 @Injectable()
 export class TodoService {
   constructor(
     @Inject('TODOS_REPOSITORY')
     private readonly todoRepository: typeof Todo,
+    @Inject('TAGS_REPOSITORY')
+    private readonly tagRepository: typeof Tag,
   ) {}
 
   async findAll() {
@@ -30,35 +33,39 @@ export class TodoService {
   }
 
   async findOne(id: number) {
-    const todo = await this.todoRepository.findOne({
+    return await this.todoRepository.findOne({
       where: {
         id,
       },
+      include: [Tag],
     });
-    if (todo !== null) {
-      return {
-        status: {
-          success: true,
-          code: 200,
-          message: 'Get Data Successfuly',
-        },
-        data: todo,
-      };
-    } else {
-      throw new HttpException('Todo not found!', HttpStatus.NOT_FOUND);
-    }
   }
 
   async createTodo(createTodoDto: CreateTodoDto, createdBy: number) {
     createTodoDto.createdBy = createdBy;
-    const todoList = await this.todoRepository.create(createTodoDto);
+
+    const [tag] = await this.tagRepository.findOrCreate({
+      where: { tag_name: createTodoDto.tagName },
+    });
+
+    const newTodo = await this.todoRepository.build({
+      title: createTodoDto.title,
+      description: createTodoDto.description,
+      isCompleted: createTodoDto.isCompleted,
+      tagName: tag.tag_name,
+    });
+
+    newTodo.tag = tag;
+
+    await newTodo.save();
+
     return {
       status: {
         success: true,
         code: 201,
         message: 'Create Data Successfuly',
       },
-      data: todoList,
+      data: newTodo,
     };
   }
 
@@ -75,6 +82,11 @@ export class TodoService {
         HttpStatus.NOT_FOUND,
       );
     }
+
+    Object.assign(todoUpdate, updateTodoDto);
+
+    await todoUpdate.save();
+
     updateTodoDto.updatedBy = updatedBy;
     await this.todoRepository.update(updateTodoDto, {
       where: { id },
@@ -94,6 +106,7 @@ export class TodoService {
       );
     }
     await this.todoRepository.destroy({ where: { id } });
+    await this.tagRepository.destroy({ where: { id } });
 
     return {
       status: {

@@ -7,20 +7,16 @@ import {
   UpdatedAt,
   DataType,
   AutoIncrement,
+  HasOne,
 } from 'sequelize-typescript';
+import { ProfileEntity } from './profile.entity';
 
 @Table({ tableName: 'users', underscored: true })
-export class AuthEntity extends Model<AuthEntity> {
+export class UserEntity extends Model<UserEntity> {
   @PrimaryKey
   @AutoIncrement
   @Column(DataType.INTEGER)
   id: number;
-
-  @Column(DataType.STRING)
-  first_name: string;
-
-  @Column(DataType.STRING)
-  last_name: string;
 
   @Column({ type: DataType.STRING, unique: true })
   email: string;
@@ -30,6 +26,9 @@ export class AuthEntity extends Model<AuthEntity> {
 
   @Column({ type: DataType.STRING, defaultValue: 'user' })
   role: string;
+
+  @HasOne(() => ProfileEntity, 'id')
+  profile: ProfileEntity;
 
   @CreatedAt
   created_at: Date;

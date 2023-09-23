@@ -1,8 +1,16 @@
-import { AuthEntity } from './entity/auth.entity';
+import { ProfileEntity } from './entity/profile.entity';
+import { UserEntity } from './entity/user.entity';
 
-export const authProviders = [
+export const userProviders = [
   {
-    provide: 'AUTH_REPOSITORY',
-    useValue: AuthEntity,
+    provide: 'USER_REPOSITORY',
+    useValue: UserEntity,
+  },
+];
+
+export const profileProviders = [
+  {
+    provide: 'PROFILE_REPOSITORY',
+    useValue: ProfileEntity,
   },
 ];

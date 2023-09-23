@@ -15,7 +15,7 @@ import { UpdateTodoDto } from './dtos/update-todo.dto';
 import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/guards/roles.guard';
 import { Roles } from 'src/guards/roles.decorator';
-import { AuthEntity } from 'src/auth/entity/auth.entity';
+import { UserEntity } from 'src/auth/entity/user.entity';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 
 @Controller('/todo')
@@ -35,13 +35,13 @@ export class TodoController {
   }
 
   @Post()
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('user')
+  // @UseGuards(JwtAuthGuard, RolesGuard)
+  // @Roles('user')
   async createTodo(
     @Body() createTodoDto: CreateTodoDto,
-    @CurrentUser() user: AuthEntity,
+    // @CurrentUser() user: UserEntity,
   ) {
-    return await this.todoService.createTodo(createTodoDto, user.id);
+    return await this.todoService.createTodo(createTodoDto, 3);
   }
 
   @Put(':id')
@@ -49,7 +49,7 @@ export class TodoController {
   @Roles('user')
   async updateTodo(
     @Body() updateTodoDto: UpdateTodoDto,
-    @CurrentUser() user: AuthEntity,
+    @CurrentUser() user: UserEntity,
     @Param('id', ParseIntPipe) id: number,
   ) {
     return await this.todoService.updateTodo(id, updateTodoDto, user.id);

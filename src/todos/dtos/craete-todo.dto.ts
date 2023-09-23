@@ -13,5 +13,9 @@ export class CreateTodoDto {
   @IsBoolean()
   isCompleted: boolean;
 
+  @IsNotEmpty()
+  @IsString()
+  tagName: string;
+
   createdBy: number;
 }

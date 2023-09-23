@@ -1,5 +1,7 @@
 import { Sequelize } from 'sequelize-typescript';
-import { AuthEntity } from 'src/auth/entity/auth.entity';
+import { ProfileEntity } from 'src/auth/entity/profile.entity';
+import { UserEntity } from 'src/auth/entity/user.entity';
+import { Tag } from 'src/todos/entity/tag.model';
 import { Todo } from 'src/todos/entity/todo.entity';
 
 export const databaseProviders = [
@@ -14,7 +16,7 @@ export const databaseProviders = [
         password: process.env.DB_PASSWORD,
         database: process.env.DB_DATABASE_NAME,
       });
-      sequelize.addModels([Todo, AuthEntity]);
+      sequelize.addModels([Todo, UserEntity, ProfileEntity, Tag]);
       await sequelize.sync();
       return sequelize;
     },

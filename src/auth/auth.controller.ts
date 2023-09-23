@@ -14,10 +14,10 @@ import { LoginUserDto } from './dots/login-user.dto';
 import { UpdateUserDto } from './dots/update-user.dto';
 import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
 import { CurrentUser } from './decorators/current-user.decorator';
-import { AuthEntity } from './entity/auth.entity';
 import { RolesGuard } from 'src/guards/roles.guard';
 import { Roles } from 'src/guards/roles.decorator';
 import { TokenVerificationMiddleware } from 'src/middlewares/token-verification.middleware';
+import { UserEntity } from './entity/user.entity';
 
 @Controller('/auth')
 export class AuthController {
@@ -37,7 +37,7 @@ export class AuthController {
   @UseGuards(TokenVerificationMiddleware, JwtAuthGuard, RolesGuard)
   @Roles('user', 'admin')
   async updateUser(
-    @CurrentUser() user: AuthEntity,
+    @CurrentUser() user: UserEntity,
     @Param('id', ParseIntPipe) id: number,
     @Body() updateUserDto: UpdateUserDto,
   ) {
@@ -48,7 +48,7 @@ export class AuthController {
   @UseGuards(TokenVerificationMiddleware, JwtAuthGuard, RolesGuard)
   @Roles('user', 'admin')
   async deleteUser(
-    @CurrentUser() user: AuthEntity,
+    @CurrentUser() user: UserEntity,
     @Param('id', ParseIntPipe) id: number,
   ) {
     return await this.authService.deleteUser(user, id);

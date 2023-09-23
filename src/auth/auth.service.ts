@@ -1,32 +1,37 @@
 import { Injectable, HttpException, HttpStatus, Inject } from '@nestjs/common';
-import { AuthEntity } from './entity/auth.entity';
 import { RegisterUserDto } from './dots/register-user.dto';
 import * as bcrypt from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
 import { LoginUserDto } from './dots/login-user.dto';
 import { UpdateUserDto } from './dots/update-user.dto';
+import { UserEntity } from './entity/user.entity';
+import { ProfileEntity } from './entity/profile.entity';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @Inject('AUTH_REPOSITORY')
-    private readonly authRepository: typeof AuthEntity,
+    @Inject('USER_REPOSITORY')
+    private readonly userRepository: typeof UserEntity,
+    @Inject('PROFILE_REPOSITORY')
+    private readonly profileRepository: typeof ProfileEntity,
     private jwtService: JwtService,
   ) {}
 
   async findOne(email: string) {
-    return await this.authRepository.findOne({
+    return await this.userRepository.findOne({
       where: {
         email,
       },
+      include: [ProfileEntity],
     });
   }
 
   async findOneById(id: number) {
-    return await this.authRepository.findOne({
+    return await this.userRepository.findOne({
       where: {
-        id,
+        id: id,
       },
+      include: [ProfileEntity],
     });
   }
 
@@ -46,11 +51,21 @@ export class AuthService {
       salt,
     );
 
-    const createUserDto = this.authRepository.build({
-      ...registerUserDto,
+    const createUserDto = this.userRepository.build({
+      email: registerUserDto.email,
+      password: registerUserDto.password,
+      role: registerUserDto.role,
     });
 
     await createUserDto.save();
+
+    const createProfileDto = this.profileRepository.build({
+      first_name: registerUserDto.first_name,
+      last_name: registerUserDto.last_name,
+      id: createUserDto.id,
+    });
+
+    await createProfileDto.save();
 
     const jwtPayload = {
       id: createUserDto.id,
@@ -62,7 +77,11 @@ export class AuthService {
       algorithm: 'HS512',
     });
 
-    const userData = { ...createUserDto['dataValues'], token };
+    const userData = {
+      ...createUserDto['dataValues'],
+      ...createProfileDto['dataValues'],
+      token,
+    };
 
     return {
       status: {
@@ -103,12 +122,23 @@ export class AuthService {
       email: user.email,
       role: user.role,
     };
-    const jwtToken = await this.jwtService.signAsync(jwtPayload, {
+    const token = await this.jwtService.signAsync(jwtPayload, {
       expiresIn: '1d',
       algorithm: 'HS512',
     });
 
-    const userData = { ...user, jwtToken };
+    const UserData = {
+      id: user.id,
+      email: user.email,
+      password: user.password,
+      role: user.role,
+      first_name: user.profile.first_name,
+      last_name: user.profile.last_name,
+      created_at: user.created_at,
+      updated_at: user.updated_at,
+    };
+
+    const userData = { ...UserData, token };
 
     return {
       status: {
@@ -130,11 +160,11 @@ export class AuthService {
   }
 
   async updateUser(
-    currentUser: AuthEntity,
+    currentUser: UserEntity,
     userId: number,
     updateUserDto: UpdateUserDto,
   ) {
-    const user = await this.authRepository.findOne({ where: { id: userId } });
+    const user = await this.findOneById(userId);
 
     if (user === null) {
       throw new HttpException(
@@ -150,10 +180,9 @@ export class AuthService {
       );
     }
 
-    await this.authRepository.update(updateUserDto, {
-      where: { id: userId },
-      returning: true,
-    });
+    Object.assign(user, updateUserDto);
+
+    await user.save();
 
     return {
       status: {
@@ -165,8 +194,8 @@ export class AuthService {
     };
   }
 
-  async deleteUser(currentUser: AuthEntity, userId: number) {
-    const user = await this.authRepository.findOne({ where: { id: userId } });
+  async deleteUser(currentUser: UserEntity, userId: number) {
+    const user = await this.findOneById(userId);
 
     if (user === null) {
       throw new HttpException(
@@ -182,7 +211,8 @@ export class AuthService {
       );
     }
 
-    await this.authRepository.destroy({ where: { id: userId } });
+    await this.userRepository.destroy({ where: { id: userId } });
+    await this.profileRepository.destroy({ where: { id: userId } });
 
     return {
       status: {

@@ -7,7 +7,10 @@ import {
   UpdatedAt,
   DataType,
   AutoIncrement,
+  BelongsTo,
+  ForeignKey,
 } from 'sequelize-typescript';
+import { Tag } from './tag.model';
 
 @Table({ tableName: 'Todos', underscored: true })
 export class Todo extends Model<Todo> {
@@ -24,6 +27,13 @@ export class Todo extends Model<Todo> {
 
   @Column(DataType.BOOLEAN)
   isCompleted: boolean;
+
+  @ForeignKey(() => Tag)
+  @Column(DataType.STRING)
+  tagName: string;
+
+  @BelongsTo(() => Tag)
+  tag: Tag;
 
   @CreatedAt
   createdAt: Date;

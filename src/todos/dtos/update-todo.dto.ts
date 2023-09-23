@@ -13,5 +13,9 @@ export class UpdateTodoDto {
   @IsBoolean()
   isCompleted: boolean;
 
+  @IsNotEmpty()
+  @IsString()
+  tagName: string;
+
   updatedBy: number;
 }
