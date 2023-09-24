@@ -13,7 +13,7 @@ export class ResourcesService {
     private readonly resourceRepository: typeof ResourceEntity,
   ) {}
 
-  async uploadImage(
+  async uploadFiles(
     file: Express.Multer.File,
     fileExtention: string,
   ): Promise<UploadApiResponse | UploadApiErrorResponse> {
@@ -38,9 +38,9 @@ export class ResourcesService {
       let fileUrl = null;
       const x = file.mimetype.split('/');
       if (x[0] === 'video') {
-        fileUrl = await this.uploadImage(file, x[0]);
+        fileUrl = await this.uploadFiles(file, x[0]);
       } else {
-        fileUrl = await this.uploadImage(file, x[0]);
+        fileUrl = await this.uploadFiles(file, x[0]);
       }
 
       const resource = await this.resourceRepository.build({
