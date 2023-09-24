@@ -1,6 +1,8 @@
 import { Sequelize } from 'sequelize-typescript';
 import { ProfileEntity } from 'src/auth/entity/profile.entity';
 import { UserEntity } from 'src/auth/entity/user.entity';
+import { ResourceEntity } from 'src/resources/entity/resources.entity';
+import { UserResourceEntity } from 'src/resources/entity/user-resouce.entity';
 import { Tag } from 'src/todos/entity/tag.model';
 import { Todo } from 'src/todos/entity/todo.entity';
 
@@ -16,7 +18,14 @@ export const databaseProviders = [
         password: process.env.DB_PASSWORD,
         database: process.env.DB_DATABASE_NAME,
       });
-      sequelize.addModels([Todo, UserEntity, ProfileEntity, Tag]);
+      sequelize.addModels([
+        Todo,
+        UserEntity,
+        ProfileEntity,
+        Tag,
+        UserResourceEntity,
+        ResourceEntity,
+      ]);
       await sequelize.sync();
       return sequelize;
     },

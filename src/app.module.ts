@@ -4,6 +4,7 @@ import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './database/database.module';
 import { Sequelize } from 'sequelize-typescript';
 import { AuthModule } from './auth/auth.module';
+import { ResourcesModule } from './resources/resources.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { AuthModule } from './auth/auth.module';
     DatabaseModule,
     TodoModule,
     AuthModule,
+    ResourcesModule,
   ],
   providers: [
     {
