@@ -26,7 +26,6 @@ export class ResourcesController {
     @CurrentUser() user: UserEntity,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    console.log(file);
     return await this.resourceService.createResource(file, user.id);
   }
 }

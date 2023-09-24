@@ -15,36 +15,21 @@ export class ResourcesService {
 
   async uploadImage(
     file: Express.Multer.File,
+    fileExtention: string,
   ): Promise<UploadApiResponse | UploadApiErrorResponse> {
     return new Promise((resolve, reject) => {
-      const upload = v2.uploader.upload_stream((error, result) => {
-        if (error) return reject(error);
-        resolve(result);
-      });
-
-      toStream(file.buffer).pipe(upload);
-    });
-  }
-
-  async uploadVideo(
-    file: Express.Multer.File,
-  ): Promise<UploadApiResponse | UploadApiErrorResponse> {
-    return new Promise((resolve, reject) => {
-      const uploadStream = v2.uploader.upload_stream(
+      const upload = v2.uploader.upload_stream(
         {
-          resource_type: 'video',
-          folder: 'videos',
+          resource_type: fileExtention === 'image' ? 'image' : 'video',
+          folder: 'files',
         },
         (error, result) => {
-          if (error) {
-            reject(error);
-          } else {
-            resolve(result);
-          }
+          if (error) return reject(error);
+          resolve(result);
         },
       );
 
-      toStream(file.buffer).pipe(uploadStream);
+      toStream(file.buffer).pipe(upload);
     });
   }
 
@@ -53,9 +38,9 @@ export class ResourcesService {
       let fileUrl = null;
       const x = file.mimetype.split('/');
       if (x[0] === 'video') {
-        fileUrl = await this.uploadVideo(file);
+        fileUrl = await this.uploadImage(file, x[0]);
       } else {
-        fileUrl = await this.uploadImage(file);
+        fileUrl = await this.uploadImage(file, x[0]);
       }
 
       const resource = await this.resourceRepository.build({
