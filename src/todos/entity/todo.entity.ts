@@ -11,10 +11,12 @@ import {
   ForeignKey,
 } from 'sequelize-typescript';
 import { Tag } from './tag.model';
+import { UserEntity } from 'src/auth/entity/user.entity';
 
 @Table({ tableName: 'Todos', underscored: true })
 export class Todo extends Model<Todo> {
   @PrimaryKey
+  @ForeignKey(() => Tag)
   @AutoIncrement
   @Column(DataType.INTEGER)
   id: number;
@@ -28,22 +30,25 @@ export class Todo extends Model<Todo> {
   @Column(DataType.BOOLEAN)
   isCompleted: boolean;
 
-  @ForeignKey(() => Tag)
   @Column(DataType.STRING)
   tagName: string;
 
   @BelongsTo(() => Tag)
   tag: Tag;
 
+  @Column(DataType.STRING)
+  avatar: string;
+
+  @ForeignKey(() => UserEntity)
+  @Column(DataType.INTEGER)
+  userId: number;
+
+  @BelongsTo(() => UserEntity)
+  user: UserEntity;
+
   @CreatedAt
   createdAt: Date;
 
   @UpdatedAt
   updatedAt: Date;
-
-  @Column({ type: DataType.INTEGER })
-  createdBy: number;
-
-  @Column({ type: DataType.INTEGER })
-  updatedBy: number;
 }

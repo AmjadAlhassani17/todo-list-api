@@ -1,4 +1,5 @@
-import { IsString, IsBoolean, IsNotEmpty } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { IsString, IsNotEmpty } from 'class-validator';
 
 export class CreateTodoDto {
   @IsNotEmpty()
@@ -10,12 +11,14 @@ export class CreateTodoDto {
   description: string;
 
   @IsNotEmpty()
-  @IsBoolean()
+  @Transform(({ obj, key }) => {
+    return obj[key] === 'true' ? true : obj[key] === 'false' ? false : obj[key];
+  })
   isCompleted: boolean;
 
   @IsNotEmpty()
   @IsString()
   tagName: string;
 
-  createdBy: number;
+  userId: number;
 }

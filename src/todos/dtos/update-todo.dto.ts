@@ -1,21 +1,22 @@
-import { IsString, IsBoolean, IsNotEmpty } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { IsOptional, IsString } from 'class-validator';
 
 export class UpdateTodoDto {
-  @IsNotEmpty()
   @IsString()
+  @IsOptional()
   title: string;
 
-  @IsNotEmpty()
   @IsString()
+  @IsOptional()
   description: string;
 
-  @IsNotEmpty()
-  @IsBoolean()
+  @IsOptional()
+  @Transform(({ obj, key }) => {
+    return obj[key] === 'true' ? true : obj[key] === 'false' ? false : obj[key];
+  })
   isCompleted: boolean;
 
-  @IsNotEmpty()
   @IsString()
+  @IsOptional()
   tagName: string;
-
-  updatedBy: number;
 }

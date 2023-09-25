@@ -12,6 +12,7 @@ import {
 } from 'sequelize-typescript';
 import { ProfileEntity } from './profile.entity';
 import { UserResourceEntity } from 'src/resources/entity/user-resouce.entity';
+import { Todo } from 'src/todos/entity/todo.entity';
 
 @Table({ tableName: 'users', underscored: true })
 export class UserEntity extends Model<UserEntity> {
@@ -34,6 +35,9 @@ export class UserEntity extends Model<UserEntity> {
 
   @HasMany(() => UserResourceEntity)
   userResources: UserResourceEntity[];
+
+  @HasMany(() => Todo, 'userId')
+  todos: Todo[];
 
   @CreatedAt
   created_at: Date;
