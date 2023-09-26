@@ -4,6 +4,7 @@ import {
   UploadedFile,
   UseGuards,
   UseInterceptors,
+  Get,
 } from '@nestjs/common';
 import { ResourcesService } from './resources.service';
 import { RolesGuard } from 'src/guards/roles.guard';
@@ -22,10 +23,17 @@ export class ResourcesController {
   @UseGuards(TokenVerificationMiddleware, JwtAuthGuard, RolesGuard)
   @Roles('user', 'admin')
   @UseInterceptors(FileInterceptor('file'))
-  async updateTodo(
+  async createResource(
     @CurrentUser() user: UserEntity,
     @UploadedFile() file: Express.Multer.File,
   ) {
     return await this.resourceService.createResource(file, user.id);
+  }
+
+  @Get()
+  @UseGuards(TokenVerificationMiddleware, JwtAuthGuard, RolesGuard)
+  @Roles('user', 'admin')
+  async getAllResource(@CurrentUser() user: UserEntity) {
+    return await this.resourceService.findAllResource(user.id);
   }
 }

@@ -7,7 +7,7 @@ import {
   UpdatedAt,
   DataType,
   AutoIncrement,
-  HasMany,
+  HasOne,
 } from 'sequelize-typescript';
 import { UserResourceEntity } from './user-resouce.entity';
 
@@ -19,17 +19,17 @@ export class ResourceEntity extends Model<ResourceEntity> {
   id: number;
 
   @Column(DataType.STRING)
-  fileType: string;
+  file_type: string;
 
   @Column(DataType.STRING)
-  fileUrl: string;
+  file_url: string;
 
-  @HasMany(() => UserResourceEntity)
-  userResources: UserResourceEntity[];
+  @HasOne(() => UserResourceEntity)
+  userResources: UserResourceEntity;
 
   @CreatedAt
-  createdAt: Date;
+  created_at: Date;
 
   @UpdatedAt
-  updatedAt: Date;
+  updated_at: Date;
 }

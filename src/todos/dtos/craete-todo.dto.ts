@@ -19,6 +19,4 @@ export class CreateTodoDto {
   @IsNotEmpty()
   @IsString()
   tagName: string;
-
-  userId: number;
 }

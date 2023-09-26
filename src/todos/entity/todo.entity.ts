@@ -9,6 +9,7 @@ import {
   AutoIncrement,
   BelongsTo,
   ForeignKey,
+  HasMany,
 } from 'sequelize-typescript';
 import { Tag } from './tag.model';
 import { UserEntity } from 'src/auth/entity/user.entity';
@@ -28,27 +29,24 @@ export class Todo extends Model<Todo> {
   description: string;
 
   @Column(DataType.BOOLEAN)
-  isCompleted: boolean;
-
-  @Column(DataType.STRING)
-  tagName: string;
-
-  @BelongsTo(() => Tag)
-  tag: Tag;
+  is_completed: boolean;
 
   @Column(DataType.STRING)
   avatar: string;
 
   @ForeignKey(() => UserEntity)
   @Column(DataType.INTEGER)
-  userId: number;
+  user_id: number;
 
   @BelongsTo(() => UserEntity)
   user: UserEntity;
 
+  @HasMany(() => Tag)
+  tags: Tag[];
+
   @CreatedAt
-  createdAt: Date;
+  created_at: Date;
 
   @UpdatedAt
-  updatedAt: Date;
+  updated_at: Date;
 }

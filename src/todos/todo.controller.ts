@@ -22,6 +22,7 @@ import { UserEntity } from 'src/auth/entity/user.entity';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { TokenVerificationMiddleware } from 'src/middlewares/token-verification.middleware';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { CreateTagDto } from './dtos/craete-tag.dto';
 
 @Controller('/todo')
 export class TodoController {
@@ -61,6 +62,13 @@ export class TodoController {
     @CurrentUser() user: UserEntity,
   ) {
     return await this.todoService.createTodo(createTodoDto, user.id, file);
+  }
+
+  @Post('tag')
+  @UseGuards(TokenVerificationMiddleware, JwtAuthGuard, RolesGuard)
+  @Roles('user', 'admin')
+  async createTag(@Body() createTagDto: CreateTagDto) {
+    return await this.todoService.createTag(createTagDto);
   }
 
   @Put(':id')

@@ -7,23 +7,26 @@ import {
   UpdatedAt,
   DataType,
   ForeignKey,
-  HasOne,
   AutoIncrement,
+  BelongsTo,
 } from 'sequelize-typescript';
 import { Todo } from './todo.entity';
 
 @Table({ tableName: 'Tags', underscored: true })
 export class Tag extends Model<Tag> {
   @PrimaryKey
-  @ForeignKey(() => Todo)
   @AutoIncrement
   @Column(DataType.INTEGER)
   id: number;
 
   @Column(DataType.STRING(255))
-  tag_name: string;
+  name: string;
 
-  @HasOne(() => Todo)
+  @ForeignKey(() => Todo)
+  @Column(DataType.INTEGER)
+  todo_id: number;
+
+  @BelongsTo(() => Todo)
   todo: Todo;
 
   @CreatedAt

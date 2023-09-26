@@ -6,6 +6,7 @@ import { Tag } from './entity/tag.model';
 import { UploadApiErrorResponse, UploadApiResponse, v2 } from 'cloudinary';
 import toStream = require('buffer-to-stream');
 import { UserEntity } from 'src/auth/entity/user.entity';
+import { CreateTagDto } from './dtos/craete-tag.dto';
 
 @Injectable()
 export class TodoService {
@@ -23,6 +24,14 @@ export class TodoService {
       const todoList = await this.todoRepository.findAll({
         limit: todosPerPage,
         offset,
+        include: [Tag],
+      });
+
+      const allTodosWithTags = todoList.map((todo) => {
+        return {
+          ...todo.toJSON(),
+          tags: todo.tags,
+        };
       });
       return {
         status: {
@@ -30,7 +39,7 @@ export class TodoService {
           code: 200,
           message: 'Get All Data Successfuly',
         },
-        data: todoList,
+        data: allTodosWithTags,
       };
     } catch (error) {
       throw new HttpException(
@@ -49,23 +58,22 @@ export class TodoService {
     });
   }
 
-  async findOneTag(id: number) {
-    return await this.tagRepository.findOne({
-      where: {
-        id,
-      },
-      include: [Tag],
-    });
-  }
-
   async findUserTodo(userId: number, page: number) {
     try {
       const todosPerPage = 10;
       const offset = (page - 1) * todosPerPage;
       const todoList = await this.todoRepository.findAll({
-        where: { userId },
+        where: { user_id: userId },
         limit: todosPerPage,
         offset,
+        include: [Tag],
+      });
+
+      const todosWithTags = todoList.map((todo) => {
+        return {
+          ...todo.toJSON(),
+          tags: todo.tags,
+        };
       });
       return {
         status: {
@@ -73,7 +81,7 @@ export class TodoService {
           code: 200,
           message: 'Get All Data Successfuly',
         },
-        data: todoList,
+        data: todosWithTags,
       };
     } catch (error) {
       throw new HttpException(
@@ -98,30 +106,33 @@ export class TodoService {
 
   async createTodo(
     createTodoDto: CreateTodoDto,
-    userId: number,
+    user_id: number,
     file: Express.Multer.File,
   ) {
     let imageUrl = null;
     imageUrl = await this.uploadImage(file);
 
+    const newTodo = await this.todoRepository.build({
+      title: createTodoDto.title,
+      description: createTodoDto.description,
+      is_completed: createTodoDto.isCompleted,
+      avatar: imageUrl['secure_url'] || null,
+      user_id: user_id,
+    });
+
+    await newTodo.save();
+
     const newTag = await this.tagRepository.build({
-      tag_name: createTodoDto.tagName,
+      name: createTodoDto.tagName,
+      todo_id: newTodo.id,
     });
 
     await newTag.save();
 
-    const newTodo = await this.todoRepository.build({
-      title: createTodoDto.title,
-      description: createTodoDto.description,
-      isCompleted: createTodoDto.isCompleted,
-      tagName: newTag.tag_name,
-      avatar: imageUrl['secure_url'],
-      userId: userId,
-    });
-
-    newTodo.tag = newTag;
-
-    await newTodo.save();
+    const responseData = {
+      ...newTodo.toJSON(),
+      tags: newTag['dataValues'],
+    };
 
     return {
       status: {
@@ -129,7 +140,25 @@ export class TodoService {
         code: 201,
         message: 'Create Data Successfuly',
       },
-      data: newTodo,
+      data: responseData,
+    };
+  }
+
+  async createTag(craeteTagDto: CreateTagDto) {
+    const newTag = await this.tagRepository.build({
+      name: craeteTagDto.name,
+      todo_id: craeteTagDto.todo_id,
+    });
+
+    await newTag.save();
+
+    return {
+      status: {
+        success: true,
+        code: 201,
+        message: 'Create Data Successfuly',
+      },
+      data: newTag,
     };
   }
 
@@ -156,10 +185,10 @@ export class TodoService {
 
     if (updateTodoDto.tagName) {
       const tag = await this.tagRepository.findOne({
-        where: { id },
+        where: { todo_id: id },
       });
 
-      await tag.update({ tag_name: updateTodoDto.tagName });
+      await tag.update({ name: updateTodoDto.tagName });
 
       await this.tagRepository.update(tag, {
         where: { id },
@@ -197,7 +226,7 @@ export class TodoService {
     }
 
     await this.todoRepository.destroy({ where: { id } });
-    await this.tagRepository.destroy({ where: { id } });
+    await this.tagRepository.destroy({ where: { todo_id: id } });
 
     return {
       status: {

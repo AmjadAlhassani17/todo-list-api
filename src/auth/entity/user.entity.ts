@@ -36,7 +36,7 @@ export class UserEntity extends Model<UserEntity> {
   @HasMany(() => UserResourceEntity)
   userResources: UserResourceEntity[];
 
-  @HasMany(() => Todo, 'userId')
+  @HasMany(() => Todo, 'user_id')
   todos: Todo[];
 
   @CreatedAt

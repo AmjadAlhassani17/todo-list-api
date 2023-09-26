@@ -8,6 +8,7 @@ import {
   DataType,
   ForeignKey,
   AutoIncrement,
+  BelongsTo,
 } from 'sequelize-typescript';
 import { ResourceEntity } from './resources.entity';
 import { UserEntity } from 'src/auth/entity/user.entity';
@@ -21,15 +22,21 @@ export class UserResourceEntity extends Model<UserResourceEntity> {
 
   @ForeignKey(() => UserEntity)
   @Column(DataType.INTEGER)
-  userId: number;
+  user_id: number;
 
   @ForeignKey(() => ResourceEntity)
   @Column(DataType.INTEGER)
-  resourceId: number;
+  resource_id: number;
+
+  @BelongsTo(() => UserEntity, { as: 'user' })
+  user: UserEntity;
+
+  @BelongsTo(() => ResourceEntity, { as: 'resource' })
+  resource: ResourceEntity;
 
   @CreatedAt
-  createdAt: Date;
+  created_at: Date;
 
   @UpdatedAt
-  updatedAt: Date;
+  updated_at: Date;
 }

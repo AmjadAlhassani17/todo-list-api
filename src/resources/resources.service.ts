@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { ResourceEntity } from './entity/resources.entity';
 import { UserResourceEntity } from './entity/user-resouce.entity';
 import { UploadApiErrorResponse, UploadApiResponse, v2 } from 'cloudinary';
@@ -44,15 +44,15 @@ export class ResourcesService {
       }
 
       const resource = await this.resourceRepository.build({
-        fileType: fileUrl['resource_type'],
-        fileUrl: fileUrl['secure_url'],
+        file_type: fileUrl['resource_type'],
+        file_url: fileUrl['secure_url'],
       });
 
       await resource.save();
 
       const user_resource = await this.userResourceRepository.build({
-        userId: userID,
-        resourceId: resource.id,
+        user_id: userID,
+        resource_id: resource.id,
       });
 
       await user_resource.save();
@@ -78,6 +78,26 @@ export class ResourcesService {
           message: error.message,
         },
       };
+    }
+  }
+
+  async findAllResource(userId: number) {
+    try {
+      const userResourceList = await this.userResourceRepository.findAll({
+        where: { user_id: userId },
+        include: ['resource'],
+      });
+
+      return {
+        status: {
+          success: true,
+          code: 200,
+          message: 'Get All Data Successfuly',
+        },
+        data: userResourceList,
+      };
+    } catch (error) {
+      throw new HttpException('something want wrong!', HttpStatus.BAD_REQUEST);
     }
   }
 }
