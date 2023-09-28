@@ -46,6 +46,9 @@ export class ResourcesService {
       const resource = await this.resourceRepository.build({
         file_type: fileUrl['resource_type'],
         file_url: fileUrl['secure_url'],
+        file_name: file.originalname,
+        mim_type: file.mimetype,
+        file_size: `${file.size} bytes`,
       });
 
       await resource.save();

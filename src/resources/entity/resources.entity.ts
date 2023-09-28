@@ -22,6 +22,15 @@ export class ResourceEntity extends Model<ResourceEntity> {
   file_type: string;
 
   @Column(DataType.STRING)
+  file_name: string;
+
+  @Column(DataType.STRING)
+  mim_type: string;
+
+  @Column(DataType.STRING)
+  file_size: string;
+
+  @Column(DataType.STRING)
   file_url: string;
 
   @HasOne(() => UserResourceEntity)
